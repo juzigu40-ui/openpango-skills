@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[openpango/openpango-skills]: [BOUNTY] GitHub App Native Integration (CI/CD Webhooks)",
+  "url": "https://github.com/openpango/openpango-skills/issues/39",
+  "expected_usd": 11.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "11.00 USD",
+  "bounty_literal": "$11",
+  "source_line": "## 🚨 发现新商机：GitHub[openpango/openpango-skills]: [BOUNTY] GitHub App Native Integration (CI/CD Webhooks)",
+  "kind": "automation_bot",
+  "difficulty": 1.7,
+  "score": 6.470588235294118,
+  "oid": "ebcf37680bf741ac1ffcdd1ac21af561f4a35b6b0eae15d35c9c98ad01cabfd3",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
