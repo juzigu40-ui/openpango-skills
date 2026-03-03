@@ -1,46 +1,68 @@
 ---
 name: "Secure Enclaves Sandbox"
-description: "Executes untrusted 3rd-party third-party skills in a highly restricted containerized environment."
-version: "1.0.0"
+description: "Firecracker/eBPF-capable secure enclave orchestration for untrusted skill execution."
+version: "2.0.0"
 user-invocable: false
 system-daemon: true
 metadata:
   capabilities:
     - security/sandbox
-    - system/execution
-  author: "Antigravity (OpenPango Core)"
+    - security/firecracker
+    - security/ebpf-policy
+    - debugging/record-replay
+  author: "OpenPango Security"
   license: "MIT"
 ---
 
 # Secure Enclaves Sandbox
 
-Enterprise compliance requires that an agent downloading a 3rd-party skill from the Decentralized Registry does not compromise the host machine. This runner executes untrusted code in a highly restricted sandbox that blocks network access, env variable dumping, and sensitive file system reads.
+This skill provides a two-layer execution boundary:
 
-## Usage
+1. **`EnclaveRunner`**: local fail-closed subprocess sandbox for test/dev fallback.
+2. **`FirecrackerOrchestrator`**: production-oriented MicroVM planning layer with:
+   - capability manifest -> seccomp policy compilation,
+   - snapshot/cold-boot strategy planning,
+   - deterministic record/replay command scaffolding,
+   - readiness benchmarking against the <50ms objective.
+
+## Core Files
+
+- `enclave_runner.py`: fallback isolated runtime.
+- `firecracker_orchestrator.py`: Firecracker/eBPF policy planner.
+- `policies/default_caps.yaml`: capability manifest sample.
+- `firecracker-orchestrator/`: Rust CLI for plan/seccomp/bench workflows.
+
+## Python Usage
 
 ```python
-from skills.security.enclave_runner import EnclaveRunner, SandboxPolicy
+from skills.security.firecracker_orchestrator import FirecrackerOrchestrator, TaskSpec
 
-sandbox = EnclaveRunner()
-
-# Tries to read /etc/passwd or steal os.environ
-malicious_code = \"\"\"
-import os
-print(os.environ)
-with open('/etc/passwd') as f:
-    print(f.read())
-\"\"\"
-
-result = sandbox.execute(
-    code_string=malicious_code, 
-    policy=SandboxPolicy.STRICT
+orchestrator = FirecrackerOrchestrator()
+plan = orchestrator.plan_boot(
+    TaskSpec(
+        task_id="task-001",
+        kernel_image="/opt/firecracker/vmlinux.bin",
+        rootfs_image="/opt/firecracker/rootfs.ext4",
+        capability_manifest="skills/security/policies/default_caps.yaml",
+    ),
+    use_snapshot=True,
+    snapshot_path="/opt/firecracker/snapshots/ready.snap",
 )
 
-print(f"Status: {result['status']}") # error: policy violation
-print(f"Logs: {result['stderr']}")
+print(plan.strategy)  # snapshot-restore
+print(plan.commands)
 ```
 
-## Features
-- **File System Jails**: Mounts an isolated temporary directory.
-- **Network Blackholing**: Blocks egress traffic to prevent data exfiltration.
-- **Process Isolation**: Drops capabilities and restricts memory/CPU quotas.
+## Rust CLI Usage
+
+```bash
+cd skills/security/firecracker-orchestrator
+cargo run -- seccomp --manifest ../policies/default_caps.yaml
+cargo run -- bench --samples 41.2,43.1,39.8,44.0,42.5
+cargo run -- plan --task-id task-001 --kernel /opt/vmlinux.bin --rootfs /opt/rootfs.ext4 --seccomp-path /tmp/seccomp.json --workdir /tmp --snapshot /tmp/snap.snap
+```
+
+## Validation
+
+- Python: `python3 -m unittest skills/security/test_enclave.py skills/security/test_firecracker_orchestrator.py`
+- Rust: `cargo test` (inside `skills/security/firecracker-orchestrator`)
