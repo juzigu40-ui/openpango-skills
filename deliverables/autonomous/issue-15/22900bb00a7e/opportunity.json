@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[openpango/openpango-skills]: [BOUNTY] Byzantine Fault Tolerant (BFT) Mesh Network for Agent Delegation",
+  "url": "https://github.com/openpango/openpango-skills/issues/15",
+  "expected_usd": 150.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "150.00 USD",
+  "bounty_literal": "$150",
+  "source_line": "## 🚨 发现新商机：GitHub[openpango/openpango-skills]: [BOUNTY] Byzantine Fault Tolerant (BFT) Mesh Network for Agent Delegation",
+  "kind": "generic_automation",
+  "difficulty": 1.0,
+  "score": 150.0,
+  "oid": "22c593f6754ae57e4de091e060d2f3e0be92dc38beddae7f17636002179cc739",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
