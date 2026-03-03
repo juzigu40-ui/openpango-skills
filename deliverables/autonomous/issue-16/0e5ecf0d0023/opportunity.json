@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[openpango/openpango-skills]: [BOUNTY] OpenPango Decentralized Skill Marketplace API",
+  "url": "https://github.com/openpango/openpango-skills/issues/16",
+  "expected_usd": 12.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "12.00 USD",
+  "bounty_literal": "$12",
+  "source_line": "## 🚨 发现新商机：GitHub[openpango/openpango-skills]: [BOUNTY] OpenPango Decentralized Skill Marketplace API",
+  "kind": "automation_bot",
+  "difficulty": 1.0,
+  "score": 12.0,
+  "oid": "c1ceab5609f562a7ffb57e5fedc5214b02746d9f5e216f3c9d77f016b95cad6b",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
