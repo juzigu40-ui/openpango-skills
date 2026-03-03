@@ -7,7 +7,12 @@ import textwrap
 import subprocess
 import logging
 from enum import Enum
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+try:
+    from .firecracker_orchestrator import FirecrackerOrchestrator, TaskSpec
+except ImportError:  # Direct script execution path
+    from firecracker_orchestrator import FirecrackerOrchestrator, TaskSpec
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("EnclaveRunner")
@@ -22,12 +27,21 @@ class EnclaveRunner:
     Executes untrusted agent skills in an isolated process to prevent host compromise.
     """
     
-    def __init__(self, use_docker: bool = False):
+    def __init__(self, use_docker: bool = False, use_firecracker: Optional[bool] = None):
         self._use_docker = use_docker
+        if use_firecracker is None:
+            use_firecracker = os.getenv("OPENPANGO_SECURE_ENCLAVE_FIRECRACKER", "0") == "1"
+        self._use_firecracker = use_firecracker
+        self._orchestrator: Optional[FirecrackerOrchestrator] = None
+
         if self._use_docker:
             logger.info("Initializing Docker-backed WASM Enclaves...")
         else:
             logger.info("Initializing Subprocess-backed Sandbox (Testing Mode)...")
+        if self._use_firecracker:
+            workspace = os.getenv("OPENPANGO_FIRECRACKER_WORKSPACE")
+            self._orchestrator = FirecrackerOrchestrator(workspace_dir=workspace)
+            logger.info("Firecracker orchestration planning is enabled.")
 
     def _generate_sandbox_wrapper(self, code_string: str) -> str:
         """
@@ -70,7 +84,28 @@ class EnclaveRunner:
         """
         run_id = f"enclave_{uuid.uuid4().hex[:8]}"
         logger.info(f"[{run_id}] Spinning up secure enclave (Policy: {policy})...")
-        
+        microvm_plan = None
+
+        if self._use_firecracker and self._orchestrator:
+            kernel = os.getenv("OPENPANGO_FIRECRACKER_KERNEL", "/opt/firecracker/vmlinux.bin")
+            rootfs = os.getenv("OPENPANGO_FIRECRACKER_ROOTFS", "/opt/firecracker/rootfs.ext4")
+            manifest = os.getenv("OPENPANGO_FIRECRACKER_CAP_MANIFEST")
+            snapshot = os.getenv("OPENPANGO_FIRECRACKER_SNAPSHOT")
+            try:
+                spec = TaskSpec(
+                    task_id=run_id,
+                    kernel_image=kernel,
+                    rootfs_image=rootfs,
+                    capability_manifest=manifest,
+                    enable_network=(policy == SandboxPolicy.RELAXED),
+                )
+                microvm_plan = self._orchestrator.dry_run(spec, snapshot_path=snapshot)
+                logger.info(
+                    f"[{run_id}] Firecracker plan ready: strategy={microvm_plan.get('strategy')} expected={microvm_plan.get('expected_ready_ms')}ms"
+                )
+            except Exception as err:  # noqa: BLE001
+                logger.warning(f"[{run_id}] Failed to build Firecracker plan: {err}")
+
         # Create an isolated temporary directory for the execution
         with tempfile.TemporaryDirectory() as tmpdir:
             safe_code = self._generate_sandbox_wrapper(code_string)
@@ -102,7 +137,8 @@ class EnclaveRunner:
                     "status": status,
                     "stdout": result.stdout.strip(),
                     "stderr": result.stderr.strip(),
-                    "exit_code": result.returncode
+                    "exit_code": result.returncode,
+                    "microvm_plan": microvm_plan,
                 }
                 
             except subprocess.TimeoutExpired:
@@ -112,11 +148,18 @@ class EnclaveRunner:
                     "status": "timeout",
                     "stdout": "",
                     "stderr": "Enclave Policy Violation: Execution timed out",
-                    "exit_code": -1
+                    "exit_code": -1,
+                    "microvm_plan": microvm_plan,
                 }
             except Exception as e:
                 logger.error(f"[{run_id}] Critical sandbox failure: {str(e)}")
-                return {"id": run_id, "status": "system_error", "stderr": str(e), "exit_code": -2}
+                return {
+                    "id": run_id,
+                    "status": "system_error",
+                    "stderr": str(e),
+                    "exit_code": -2,
+                    "microvm_plan": microvm_plan,
+                }
 
 if __name__ == "__main__":
     sandbox = EnclaveRunner()

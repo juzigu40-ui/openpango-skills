@@ -1,0 +1,5 @@
+capabilities:
+  - allow_exec
+  - allow_raw_socket
+network_mode: restricted
+trace_mode: rr

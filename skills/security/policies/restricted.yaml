@@ -1,0 +1,4 @@
+capabilities:
+  - allow_exec
+network_mode: none
+trace_mode: rr

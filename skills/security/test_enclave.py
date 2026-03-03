@@ -1,4 +1,5 @@
 import unittest
+import os
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -40,6 +41,20 @@ class TestEnclaveRunner(unittest.TestCase):
         
         self.assertEqual(res["status"], "timeout")
         self.assertIn("timed out", res["stderr"])
+
+    def test_firecracker_plan_attachment(self):
+        os.environ["OPENPANGO_SECURE_ENCLAVE_FIRECRACKER"] = "1"
+        os.environ["OPENPANGO_FIRECRACKER_KERNEL"] = "/opt/firecracker/vmlinux.bin"
+        os.environ["OPENPANGO_FIRECRACKER_ROOTFS"] = "/opt/firecracker/rootfs.ext4"
+        try:
+            sandbox = EnclaveRunner()
+            res = sandbox.execute("print('ok')")
+            self.assertIsNotNone(res.get("microvm_plan"))
+            self.assertIn("commands", res["microvm_plan"])
+        finally:
+            os.environ.pop("OPENPANGO_SECURE_ENCLAVE_FIRECRACKER", None)
+            os.environ.pop("OPENPANGO_FIRECRACKER_KERNEL", None)
+            os.environ.pop("OPENPANGO_FIRECRACKER_ROOTFS", None)
 
 if __name__ == '__main__':
     unittest.main()
