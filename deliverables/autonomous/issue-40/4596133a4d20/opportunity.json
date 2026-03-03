@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[openpango/openpango-skills]: [BOUNTY] RL/Game Environment Sandbox (Minecraft/OpenAI Gym)",
+  "url": "https://github.com/openpango/openpango-skills/issues/40",
+  "expected_usd": 15.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "15.00 USD",
+  "bounty_literal": "$15",
+  "source_line": "## 🚨 发现新商机：GitHub[openpango/openpango-skills]: [BOUNTY] RL/Game Environment Sandbox (Minecraft/OpenAI Gym)",
+  "kind": "generic_automation",
+  "difficulty": 1.0,
+  "score": 15.0,
+  "oid": "8363d2d4d82b7114e1cfa59ad5d2e7e641bf02e124ac7cb61b0d66dbb2558c63",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
