@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[openpango/openpango-skills]: [BOUNTY] Web3 Smart Contract Deployment & Testing Integration",
+  "url": "https://github.com/openpango/openpango-skills/issues/26",
+  "expected_usd": 12.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "12.00 USD",
+  "bounty_literal": "$12",
+  "source_line": "## 🚨 发现新商机：GitHub[openpango/openpango-skills]: [BOUNTY] Web3 Smart Contract Deployment & Testing Integration",
+  "kind": "generic_automation",
+  "difficulty": 1.7,
+  "score": 7.0588235294117645,
+  "oid": "666eba623c0c349a851c2a3c60cbe2d47bedb828f6c83cf0bbe49a1263097c9e",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
